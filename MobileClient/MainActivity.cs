@@ -3,8 +3,9 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Runtime;
 using Android.Widget;
-using Android;
+using System.Net;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 namespace MobileClient
 {
@@ -24,32 +25,51 @@ namespace MobileClient
 
             // Get our UI controls from the loaded layout
             EditText message = FindViewById<EditText>(Resource.Id.input_text);
-            TextView recieved = FindViewById<TextView>(Resource.Id.text_recieved);
+            EditText recieved = FindViewById<EditText>(Resource.Id.text_recieved);
             Button sendbutton = FindViewById<Button>(Resource.Id.btn_send);
             Button updateButton = FindViewById<Button>(Resource.Id.btn_update);
+            Button clearButton = FindViewById<Button>(Resource.Id.btn_clear);
             Spinner spinner = FindViewById<Spinner>(Resource.Id.spinner_ips);
 
-            updateIPs(spinner);
+            List<string> ips = new List<string>{ "192.168.43.171", "192.168.0.52" };
+
+            updateIPs(spinner, ips.ToArray());
 
             updateButton.Click += (sender, e) =>
             {
-                updateIPs(spinner);
+                IPAddress trash;
+                if (IPAddress.TryParse(message.Text, out trash))
+                    ips.Add(message.Text);
+
+                updateIPs(spinner, ips.ToArray());
             };
-            
+
+            clearButton.Click += (sender, e) =>
+            {
+                recieved.Text = "";
+            };
+
+            recieved.LongClick += (sender, e) =>
+            {
+                recieved.FocusableInTouchMode = !recieved.FocusableInTouchMode;
+
+                if (recieved.FocusableInTouchMode)
+                    recieved.RequestFocus();
+
+                recieved.Text += "loooong\r\n";
+            };
 
             sendbutton.Click += (sender, e) =>
             {
                 m_client = new Client(5000, spinner.SelectedItem.ToString());
 
-                string recievedMessage = m_client.sendMessage(message.Text);
-                if (string.IsNullOrWhiteSpace(recievedMessage))
-                {
-                    recieved.Text = string.Empty;
-                }
+                PingReply reply = m_client.testConnection();
+
+                if (reply.Status == IPStatus.Success)
+                    recieved.Text += m_client.sendMessage(message.Text) + "\r\n";
+
                 else
-                {
-                    recieved.Text = recievedMessage;
-                }
+                    recieved.Text += $"No connection could be established to {m_client.m_ip}:{m_client.m_port}\r\n";
             };
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -59,10 +79,8 @@ namespace MobileClient
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-        private void updateIPs(Spinner spinner)
+        private void updateIPs(Spinner spinner, string[] ips)
         {
-            string[] ips = { "192.168.43.171"};
-
             ArrayAdapter<string> adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleSpinnerItem, ips);
             adapter.SetDropDownViewResource(Android.Resource.Layout.SimpleSpinnerDropDownItem);
             spinner.Adapter = adapter;

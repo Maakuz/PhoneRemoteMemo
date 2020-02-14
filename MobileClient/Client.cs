@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Net;
-using System.Net.NetworkInformation;
+﻿using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 
 public class Client
 {
-    private int m_port;
-    private string m_ip;
+    public int m_port { get; }
+    public string m_ip { get; }
 
     public Client(int port, string ip)
     {
@@ -15,16 +13,12 @@ public class Client
         m_ip = ip;
     }
 
-    public bool testConnection()
+    public PingReply testConnection()
     {
-        bool connected = false;
-        TcpClient client = new TcpClient(m_ip, m_port);
-        if (client.Connected)
-            connected = true;
+        Ping ping = new Ping();
+        int timeout = 120;
 
-        client.Close();
-
-        return connected;
+       return ping.Send(m_ip, timeout);
     }
 
     public string sendMessage(string message)
@@ -32,17 +26,22 @@ public class Client
         if (message.Length == 0)
             return "No meesage to send";
 
-        TcpClient client = new TcpClient(m_ip, m_port);
+        TcpClient client = new TcpClient();
+
+
+        if (!client.ConnectAsync(m_ip, m_port).Wait(1000))
+            return $"No listeners on port {m_port}.";
+        
         NetworkStream netStream = client.GetStream();
 
-        byte[] bytes = ASCIIEncoding.ASCII.GetBytes(message);
+        byte[] bytes = Encoding.ASCII.GetBytes(message);
 
         netStream.Write(bytes, 0, bytes.Length);
 
         byte[] recievedBytes = new byte[client.ReceiveBufferSize];
         int bytesRead = netStream.Read(recievedBytes, 0, client.ReceiveBufferSize);
 
-
+        client.Close();
         return Encoding.ASCII.GetString(recievedBytes, 0, bytesRead);
     }
 }

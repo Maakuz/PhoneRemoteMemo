@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="25px"
@@ -6,20 +6,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/relativeLayout1">
+    <Spinner
+        android:id="@+id/spinner_ips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+    />
+
+        <Button
+        android:id="@+id/btn_update"
+        android:layout_below="@id/spinner_ips"
+        android:text="Update connections"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+    />
+
     <TextView
         android:id="@+id/text_send"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@id/btn_update"
         android:text="Send message:"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        />
+    />
+
     <EditText
         android:id="@+id/input_text"
         android:layout_below="@id/text_send"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="text" 
+        android:singleLine="false" 
     />
+
     <Button
         android:id="@+id/btn_send"
         android:layout_below="@id/input_text"
@@ -27,24 +45,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
     />
-    <TextView
+
+    <EditText
         android:id="@+id/text_recieved"
         android:layout_below="@id/btn_send"
-        android:text="Received"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_width="wrap_content"
+        android:focusable="false"
+        android:inputType="none"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-    />
-    <Spinner
-        android:id="@+id/spinner_ips" 
-        android:layout_below="@id/text_recieved"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-    />
+        android:singleLine="false" 
+        />
     <Button
-        android:text="Update connections"
+        android:id="@+id/btn_clear" 
+        android:layout_below="@id/input_text"
+        android:layout_toRightOf="@id/btn_send"
+        android:text="Clear log"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/spinner_ips"
-        android:id="@+id/btn_update" />
+    />
 </RelativeLayout>
